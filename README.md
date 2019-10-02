@@ -18,6 +18,8 @@ Integrates [Yolact](https://github.com/dbolya/yolact) with ROS
    
    conda install opencv
    pip install pyyaml
+   pip install rospkg
+
    
    ```
  - Clone this repository and enter it:
