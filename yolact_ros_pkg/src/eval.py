@@ -1,7 +1,7 @@
-#!/home/juhk/anaconda3/envs/torch/bin/python
+#!/home/geonhee-ml/anaconda2/envs/torch11py36/bin/python
 
 import sys
-sys.path.append('/home/juhk/catkin_ws/src/test_/test/src/yolact')
+sys.path.append('/home/geonhee-ml/catkin_ws/src/yolact_ros/yolact_ros_pkg/src/yolact')
 
 from data import COCODetection, get_label_map, MEANS, COLORS
 from yolact import Yolact
@@ -224,7 +224,7 @@ class detect:
                     cv2.imshow(path, frame_buffer.get())
                     last_time = next_time
 
-                self.image_pub.publish(self.bridge.cv2_to_imgmsg(frame_buffer.get(), "bgr8"))
+                #self.image_pub.publish(self.bridge.cv2_to_imgmsg(frame_buffer.get(), "bgr8"))
 
                 if cv2.waitKey(1) == 27: # Press Escape to close
                     running = False
@@ -483,5 +483,4 @@ if __name__ == '__main__':
 
         detect_ = detect()
         detect_.evalvideo(net, args.video)
-
 
