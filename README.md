@@ -53,6 +53,12 @@ To evalute the model, put the corresponding weights file in the `./weights` dire
 rosrun test eval.py --trained_model={weight 주소} --score_threshold=0.3 --top_k=100 --video_multiframe=2 --video=0
 
 ```
+
+In my workspace, After downloaded the [weight](https://drive.google.com/file/d/1yp7ZbbDwvMiFJEq4ptVKTYTI2VeRDXl0/view?usp=sharing), copy and paste to the _trained_model path_.
+```
+rosrun yolact_ros_pkg eval.py --trained_model=/home/geonhee-ml/catkin_ws/src/Yolact_ROS/yolact_ros_pkg/src/yolact/data/yolact_resnet50_54_800000.pth --score_threshold=0.3 --top_k=100 --video_multiframe=2 --video=0
+```
+
 ## webcam publish
 ```
 rosrun test test_sub.py
