@@ -50,7 +50,7 @@ To evalute the model, put the corresponding weights file in the `./weights` dire
 # webcam demo
 
 ```
-rosrun test eval.py --trained_model={weight 주소} --score_threshold=0.3 --top_k=100 --video_multiframe=2 --video=0
+rosrun test eval.py --trained_model={weight directory} --score_threshold=0.3 --top_k=100 --video_multiframe=2 --video=0
 
 ```
 
@@ -63,7 +63,7 @@ rosrun yolact_ros_pkg eval.py --trained_model=/home/geonhee-ml/catkin_ws/src/Yol
 ```
 rosrun test test_sub.py
 
-rosrun test eval.py --trained_model={weight 주소} --score_threshold=0.3 --top_k=100 --video_multiframe=2 --video=0
+rosrun test eval.py --trained_model={weight directory} --score_threshold=0.3 --top_k=100 --video_multiframe=2 --video=0
 ```
 
 
