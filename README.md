@@ -1,4 +1,4 @@
-# Yolact_ROS
+# yolact_ros
 
 Integrates [Yolact](https://github.com/dbolya/yolact) with ROS
 
