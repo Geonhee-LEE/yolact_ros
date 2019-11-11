@@ -12,7 +12,7 @@ Integrates [Yolact](https://github.com/dbolya/yolact) with ROS
 # Installation
  - Set up a Python3 environment.
  - Install [Pytorch](http://pytorch.org/) 1.0.1 (or higher) and TorchVision.
-  - conda install pytorch==1.0.1 torchvision==0.2.2 cudatoolkit=9.0 -c pytorch
+   - conda install pytorch==1.0.1 torchvision==0.2.2 cudatoolkit=9.0 -c pytorch
  - Install some other packages:
    ```Shell
    # Cython needs to be installed before pycocotools
