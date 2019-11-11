@@ -12,6 +12,7 @@ Integrates [Yolact](https://github.com/dbolya/yolact) with ROS
 # Installation
  - Set up a Python3 environment.
  - Install [Pytorch](http://pytorch.org/) 1.0.1 (or higher) and TorchVision.
+  - conda install pytorch==1.0.1 torchvision==0.2.2 cudatoolkit=9.0 -c pytorch
  - Install some other packages:
    ```Shell
    # Cython needs to be installed before pycocotools
@@ -58,7 +59,9 @@ rosrun yolact_ros yolact_ros.py  --trained_model=/home/nscl/catkin_ws/src/yolact
 
 In my workspace, After downloaded the [weight](https://drive.google.com/file/d/1yp7ZbbDwvMiFJEq4ptVKTYTI2VeRDXl0/view?usp=sharing), copy and paste to the _trained_model path_.
 
-Conda env: torch11py36
+Conda env: 
+- torch11py36(Custom computer)
+- py36_ros(NSCL computer)
 ```
 rosrun yolact_ros_pkg eval.py --trained_model=/home/geonhee-ml/catkin_ws/src/yolact_ros/yolact_ros_pkg/src/yolact/data/yolact_resnet50_54_800000.pth --score_threshold=0.3 --top_k=100 --video_multiframe=2 --video=0
 ```
