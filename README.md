@@ -52,7 +52,7 @@ To evalute the model, put the corresponding weights file in the `./weights` dire
 # webcam demo
 
 ```
-rosrun test eval.py --trained_model={weight directory} --score_threshold=0.3 --top_k=100 --video_multiframe=2 --video=0
+rosrun yolact_ros yolact_ros.py  --trained_model=/home/nscl/catkin_ws/src/yolact_instance/weights/yolact_resnet50_54_800000.pth  --score_threshold=0.3 --top_k=100 --video_multiframe=2 --video=0
 
 ```
 
