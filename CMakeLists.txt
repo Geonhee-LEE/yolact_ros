@@ -109,7 +109,10 @@ catkin_package(
 #  DEPENDS system_lib
 )
 
-catkin_install_python(PROGRAMS script/yolact_ros.py 
+catkin_install_python(PROGRAMS 
+	script/yolact_ros.py
+	script/yolact_webcam.py 
+	script/yolact_capture_img.py  
 			DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 ###########
