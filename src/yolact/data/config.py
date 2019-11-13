@@ -55,6 +55,14 @@ COCO_LABEL_MAP = { 1:  1,  2:  2,  3:  3,  4:  4,  5:  5,  6:  6,  7:  7,  8:  8
                   82: 73, 84: 74, 85: 75, 86: 76, 87: 77, 88: 78, 89: 79, 90: 80}
 
 
+NOBRAND_MINI_CLASSES = ('wet_tissue','food_wrap','steel_scourer','aluminum_foil',
+                        'food_storage_bag','disposable_plate','paper_cups','hangers',
+                        'roller_cleaner','mint_mouthwash','coke','cold_brew',
+                        'cafe_americano','yogurt','strawberry_yogurt','XYLITOL',
+                        'sweetpotato_chip','potato_chip_origin','potato_chip_onion',
+                        'potato_chip_wassbi')
+
+
 
 # ----------------------- CONFIG CLASS ----------------------- #
 
@@ -156,6 +164,18 @@ coco2017_testdev_dataset = dataset_base.copy({
 })
 
 
+
+nobrand_mini_dataset = dataset_base.copy({
+    'name': 'nobrand_mini',
+    
+    'train_images': './data/nobrand/images/train',
+    'train_info': './data/nobrand/annotations/train_nobrand.json',
+    'valid_images': './data/nobrand/images/val',
+    'valid_info': './data/nobrand/annotations/val_nobrand.json',
+
+    'class_names': NOBRAND_MINI_CLASSES,
+
+})
 
 
 
@@ -579,8 +599,10 @@ yolact_base_config = coco_base_config.copy({
     'name': 'yolact_base',
 
     # Dataset stuff
-    'dataset': coco2017_dataset,
-    'num_classes': len(coco2017_dataset.class_names) + 1,
+    #'dataset': coco2017_dataset,
+    #'num_classes': len(coco2017_dataset.class_names) + 1,
+    'dataset': nobrand_mini_dataset,
+    'num_classes': len(nobrand_mini_dataset.class_names) + 1,
 
     # Image Size
     'max_size': 550,
