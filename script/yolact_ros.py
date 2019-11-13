@@ -9,7 +9,7 @@ import sys
 # ROS related imports
 import rospy
 from std_msgs.msg import String , Header
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image as ROSImage
 from cv_bridge import CvBridge, CvBridgeError
 
 # Yolact
@@ -45,10 +45,7 @@ from PIL import Image
 
 import matplotlib.pyplot as plt
 import cv2
-import rospy
-from sensor_msgs.msg import Image as Images
-from cv_bridge import CvBridge, CvBridgeError
-from std_msgs.msg import String
+
 
 def str2bool(v):
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
@@ -163,9 +160,12 @@ class CustomDataParallel(torch.nn.DataParallel):
 class detect:
     def __init__(self):
         rospy.init_node('yolact_node', anonymous=False)
-        self.image_pub = rospy.Publisher("/usb_cam/image_raw",Images)
         self.bridge = CvBridge()
+        self.image_sub = rospy.Subscriber("image_topic", ROSImage, self.img_callback)
 
+    def img_callback(self, data):
+        print ("cb")
+        
     def evalvideo(self,net:Yolact, path:str):
         # If the path is a digit, parse it as a webcam index
         is_webcam = path.isdigit()
@@ -432,7 +432,9 @@ class detect:
         
         return img_numpy
 
+    
 if __name__ == '__main__':
+
     parse_args()
 
     if args.config is not None:
