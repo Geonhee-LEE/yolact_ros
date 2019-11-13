@@ -66,6 +66,11 @@ Conda env:
 rosrun yolact_ros_pkg eval.py --trained_model=/home/geonhee-ml/catkin_ws/src/yolact_ros/yolact_ros_pkg/src/yolact/data/yolact_resnet50_54_800000.pth --score_threshold=0.3 --top_k=100 --video_multiframe=2 --video=0
 ```
 
+# Image test with ROS
+```
+rosrun yolact_ros yolact_capture_img.py  --trained_model=/home/geonhee-ml/Downloads/yolact_resnet50_54_800000.pth  --score_threshold=0.3 --top_k=100 --image=/home/geonhee-ml/rl_ws/src/yolact_ros/src/yolact/image/1.png
+```
+
 ## webcam publish
 ```
 rosrun test test_sub.py
