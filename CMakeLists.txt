@@ -11,6 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  yolact_ros_msgs
+  cv_bridge
 )
 
 ## System dependencies are found with CMake's conventions
@@ -105,7 +107,8 @@ catkin_python_setup()
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES yolact_ros_pkg
-#  CATKIN_DEPENDS roscpp rospy std_msgs
+  CATKIN_DEPENDS roscpp rospy std_msgs cv_bridge yolact_ros_msgs
+
 #  DEPENDS system_lib
 )
 
@@ -113,6 +116,7 @@ catkin_install_python(PROGRAMS
 	script/yolact_ros.py
 	script/yolact_webcam.py 
 	script/yolact_capture_img.py  
+	script/yolact_tcp_img.py
 			DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 ###########
