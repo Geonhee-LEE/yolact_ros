@@ -43,17 +43,12 @@ import matplotlib.pyplot as plt
 import socket
 
 
-# ROS message for yolact
-from yolact_ros_msgs.msg import Detections
-from yolact_ros_msgs.msg import Detection
-from yolact_ros_msgs.msg import Box
-from yolact_ros_msgs.msg import Mask
-
-
 iou_thresholds = [x / 100 for x in range(50, 100, 5)]
 coco_cats = {} # Call prep_coco_cats to fill this
 coco_cats_inv = {}
 color_cache = defaultdict(lambda: {})
+
+sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages')
 
 # ROS
 import rospy
@@ -83,7 +78,7 @@ def str2bool(v):
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
 class DetectImg:
-    def __init__(self, net:Yolact):
+    def __init__(self, net:Yolact, dataset):
         self.net = net
         print ("init")
         self.detections_pub = rospy.Publisher("detections",numpy_msg(Detections),queue_size=10)
@@ -301,6 +296,7 @@ class DetectImg:
             print(e)
 
 def main():
+    rospy.init_node('yolact_ros', anonymous=True)
     if args.config is not None:
         set_cfg(args.config)
 
@@ -358,8 +354,9 @@ def main():
         print("Shutting down")
     cv2.destroyAllWindows()
 
-if __name__ == '__main__':
 
+
+def parse_args(argv=None):
     parser = argparse.ArgumentParser(
         description='YOLACT COCO Evaluation')
     parser.add_argument('--trained_model',
@@ -442,6 +439,7 @@ if __name__ == '__main__':
     if args.seed is not None:
         random.seed(args.seed)
 
+
+if __name__ == '__main__':
+    parse_args()
     main()
-
-
