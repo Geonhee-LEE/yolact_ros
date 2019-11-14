@@ -5,13 +5,7 @@
 
 import sys
 
-
-# ROS related imports
-import rospy
-from std_msgs.msg import String , Header
-from sensor_msgs.msg import Image as ROSImage
-from cv_bridge import CvBridge, CvBridgeError
-
+ 
 # Yolact
 import yolact
 from yolact.data.coco import COCODetection, get_label_map
@@ -159,12 +153,7 @@ class CustomDataParallel(torch.nn.DataParallel):
 
 class detect:
     def __init__(self):
-        rospy.init_node('yolact_node', anonymous=False)
-        self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("image_topic", ROSImage, self.img_callback)
-
-    def img_callback(self, data):
-        print ("cb")
+        print ("init")
         
     def evalvideo(self,net:Yolact, path:str):
         # If the path is a digit, parse it as a webcam index
