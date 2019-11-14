@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-## Author: Geonhee !/home/nscl/anaconda3/envs/py36_ros/bin/python
-## Date: November, 11, 2019 
+## Author: Geonhee
+## Date: November, 11, 2019
 # Purpose: Ros node to use Yolact  using Pytorch
 
 import sys
+
 
 # ROS related imports
 import rospy
@@ -26,9 +27,6 @@ import pycocotools
 
 from yolact.data.config import cfg, set_cfg, set_dataset
 
-# For Yolact and ROS
-from yolact_interface import YolactInterface
-
 import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
@@ -46,13 +44,8 @@ from collections import OrderedDict
 from PIL import Image
 
 import matplotlib.pyplot as plt
-
-ros_path = '/opt/ros/kinetic/lib/python2.7/dist-packages'
-if ros_path in sys.path:
-    sys.path.remove(ros_path)
-    
 import cv2
-sys.path.append('/opt/ros/kinetic/lib/python2.7/dist-packages')
+
 
 def str2bool(v):
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
@@ -161,30 +154,17 @@ class CustomDataParallel(torch.nn.DataParallel):
         # Note that I don't actually want to convert everything to the output_device
         return sum(outputs, [])
 
-class Detect:
+
+
+
+class detect:
     def __init__(self):
         rospy.init_node('yolact_node', anonymous=False)
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("image_topic", ROSImage, self.img_callback)
-        self.yolact_interface = YolactInterface(args.trained_model)  # TODO: Change load model function
 
     def img_callback(self, data):
-        try:
-            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
-        except CvBridgeError as e:
-            print(e)
-
-        (rows,cols,channels) = cv_image.shape
-        if cols > 60 and rows > 60 :
-            cv2.circle(cv_image, (50,50), 10, 255)
-
-        response["result"] = self.yolact_interface.run_once(cv_image)  # TODO: Change inference once function
-        print(response["result"])
-
-        cv2.imshow("Image window", cv_image)
-        cv2.waitKey(3)
-
-        
+        print ("cb")
         
     def evalvideo(self,net:Yolact, path:str):
         # If the path is a digit, parse it as a webcam index
@@ -277,6 +257,8 @@ class Detect:
                 while time.time() < target_time:
                     time.sleep(0.001)
                 
+
+
         extract_frame = lambda x, i: (x[0][i] if x[1][i] is None else x[0][i].to(x[1][i]['box'].device), [x[1][i]])
 
         # Prime the network on the first frame because I do some thread unsafe things otherwise
@@ -501,18 +483,17 @@ if __name__ == '__main__':
             dataset = None        
 
         print('Loading model...', end='')
-        #net = Yolact()
-        #net.load_weights(args.trained_model)
-        #net.eval()
+        net = Yolact()
+        net.load_weights(args.trained_model)
+        net.eval()
         print(' Done.')
 
-        #if args.cuda:
-        #    net = net.cuda()
+        if args.cuda:
+            net = net.cuda()
 
-        #net.detect.use_fast_nms = args.fast_nms
-        #cfg.mask_proto_debug = args.mask_proto_debug
+        net.detect.use_fast_nms = args.fast_nms
+        cfg.mask_proto_debug = args.mask_proto_debug
 
-        detect_ = Detect()
-        #detect_.evalvideo(net, args.video)
+        detect_ = detect()
+        detect_.evalvideo(net, args.video)
 
-    rospy.spin()
