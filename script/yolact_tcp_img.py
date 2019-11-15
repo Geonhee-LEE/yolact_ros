@@ -53,7 +53,7 @@ color_cache = defaultdict(lambda: {})
 # ROS
 import rospy
 import rospkg
-from std_srvs.srv import Empty
+from std_srvs.srv import SetBool, SetBoolResponse, SetBoolRequest
 from rospy.numpy_msg import numpy_msg
 from std_msgs.msg import String
 from std_msgs.msg import Header
@@ -172,12 +172,12 @@ class DetectImg:
         self.detections_pub = rospy.Publisher("detections",numpy_msg(Detections),queue_size=10)
         self.image_pub = rospy.Publisher("cvimage_published",Image,queue_size=10)
 
-        start_server = rospy.Service('/start_instance_seg', Empty, self.server_cb)
+        start_server = rospy.Service('/start_instance_seg', SetBool, self.server_cb)
 
     def server_cb(self, data):
         self.evaluate(self.net, self.dataset)
 
-        return True
+        return SetBoolResponse(True, "Detect!!!")
 
     def evaluate(self, net:Yolact, dataset, train_mode=False):
         net.detect.use_fast_nms = args.fast_nms
@@ -318,10 +318,8 @@ class DetectImg:
         #frame = torch.from_numpy(cv2.imread(path)).cuda().float()
         frame = torch.from_numpy(cv_img).cuda().float()
         batch = FastBaseTransform()(frame.unsqueeze(0))
-        print ("evalimage, batch")
         preds = self.net(batch)
 
-        print ("img_numpy")
         img_numpy = self.prep_display(preds, frame, None, None, undo_transform=False)
         
         if save_path is None:
@@ -421,6 +419,7 @@ class DetectImg:
             # Note, make sure this is a uint8 tensor or opencv will not anti alias text for whatever reason
             img_numpy = (img_gpu * 255).byte().cpu().numpy()
             
+            print("Num dets: ",  num_dets_to_consider)
             if args.display_text or args.display_bboxes:
                 for j in reversed(range(num_dets_to_consider)):
                     x1, y1, x2, y2 = boxes[j, :]
@@ -454,14 +453,13 @@ class DetectImg:
                     det.class_name = _class
                     det.score = score
                     mask_shape = np.shape(masks[j])
-                    print("Num dets: ",  num_dets_to_consider)
-                    print("Shape: ", mask_shape)
+                    #print("Shape: ", mask_shape)
                     mask_bb = np.squeeze(masks[j].cpu().numpy(), axis=2)[y1:y2,x1:x2]
                     print("Box: ", x1,",",x2,",",y1,",",y2)
-                    print("Mask in box shape: ", np.shape(mask_bb))
+                    #print("Mask in box shape: ", np.shape(mask_bb))
                     mask_rs = np.reshape(mask_bb, -1)
-                    print("New shape: ", np.shape(mask_rs))
-                    print("Mask:\n",mask_bb)
+                    #print("New shape: ", np.shape(mask_rs))
+                    #print("Mask:\n",mask_bb)
                     det.mask.height = y2 - y1
                     det.mask.width = x2 - x1
                     det.mask.mask = np.array(mask_rs, dtype=bool)
@@ -588,8 +586,6 @@ def main():
     except KeyboardInterrupt:
         print("Shutting down")
     cv2.destroyAllWindows()
-
-
 
 if __name__ == '__main__':
     main()
