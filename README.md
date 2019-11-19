@@ -62,21 +62,15 @@ In my workspace, After downloaded the [weight](https://drive.google.com/file/d/1
 Conda env: 
 - torch11py36(Custom computer)
 - py36_ros(NSCL computer)
+
 ```
 rosrun yolact_ros_pkg eval.py --trained_model=/home/geonhee-ml/catkin_ws/src/yolact_ros/yolact_ros_pkg/src/yolact/data/yolact_resnet50_54_800000.pth --score_threshold=0.3 --top_k=100 --video_multiframe=2 --video=0
 ```
 
 
-## Test image with customized config
+## Capture image with customized config (In my case, Nobrand)
 ```
 rosrun yolact_ros yolact_capture_img.py  --trained_model=/home/geonhee-ml/catkin_build_ws/src/yolact_ros/src/yolact/weight/yolact_base_1234_100000.pth  --score_threshold=0.3 --top_k=100 --image=/home/geonhee-ml/catkin_build_ws/src/yolact_ros/src/yolact/image/116.jpg 
-```
-
-## webcam publish
-```
-rosrun test test_sub.py
-
-rosrun test eval.py --trained_model={weight directory} --score_threshold=0.3 --top_k=100 --video_multiframe=2 --video=0
 ```
 
 
@@ -86,7 +80,6 @@ rosrun test eval.py --trained_model={weight directory} --score_threshold=0.3 --t
 ./realsense
 ```
 
-
 ```
 roscore
 ```
@@ -95,4 +88,14 @@ roscore
 ```
 rosrun yolact_ros yolact_tcp_img.py  --trained_model=/home/geonhee-ml/rl_ws/src/yolact_ros/src/yolact/weight/yolact_base_1234_100000.pth  --score_threshold=0.3 --top_k=100 --image=/home/geonhee-ml/rl_ws/src/yolact_ros/src/yolact/image/116.jpg 
 
+```
+
+### Save image from realsense through ros serveice
+
+```
+rosrun yolact_ros yolact_save_img.py 
+```
+
+```
+rosservice call /save_image "data: false" 
 ```
