@@ -70,7 +70,7 @@ rosrun yolact_ros_pkg eval.py --trained_model=/home/geonhee-ml/catkin_ws/src/yol
 
 ## Capture image with customized config (In my case, Nobrand)
 ```
-rosrun yolact_ros yolact_capture_img.py  --trained_model=/home/geonhee-ml/catkin_build_ws/src/yolact_ros/src/yolact/weight/yolact_base_1234_100000.pth  --score_threshold=0.3 --top_k=100 --image=/home/geonhee-ml/catkin_build_ws/src/yolact_ros/src/yolact/image/116.jpg 
+rosrun yolact_ros yolact_capture_img.py  --trained_model=/home/geonhee-ml/rl_ws/src/yolact_ros/src/yolact/weight/yolact_base_1234_100000.pth  --score_threshold=0.3 --top_k=100 --image=/home/geonhee-ml/rl_ws/src/yolact_ros/src/yolact/image/116.jpg
 ```
 
 
@@ -98,4 +98,10 @@ rosrun yolact_ros yolact_save_img.py
 
 ```
 rosservice call /save_image "data: false" 
+```
+
+### Run ros server for getting call and sending instance information
+
+```
+rosrun yolact_ros yolact_ros_server.py  --trained_model=/home/geonhee-ml/rl_ws/src/yolact_ros/src/yolact/weight/yolact_base_1234_100000.pth  --score_threshold=0.3 --top_k=100 
 ```
