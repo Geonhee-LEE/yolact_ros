@@ -192,16 +192,16 @@ class DetectImg:
         batch = FastBaseTransform()(frame.unsqueeze(0))
         preds = self.net(batch)
 
-        img_numpy, masks = self.prep_display(preds, frame, None, None, undo_transform=False)
+        num_dets_to_consider, img_numpy, masks = self.prep_display(preds, frame, None, None, undo_transform=False)
         
         try:
             self.image_pub.publish(self.bridge.cv2_to_imgmsg(img_numpy, "bgr8"))
-            self.get_orientation_from_mask(img_numpy, masks)
+            self.get_orientation_from_mask(num_dets_to_consider, img_numpy, masks)
         except CvBridgeError as e:
             print(e)
 
     
-    def get_orientation_from_mask(self, img_numpy, mask):
+    def get_orientation_from_mask(self, num_dets_to_consider, img_numpy, mask):
         mask_data = mask.cpu()
         mask_data = mask_data.numpy()
         mask_data = mask_data.astype(np.int64)
@@ -210,6 +210,9 @@ class DetectImg:
         mask_h_sum = 0
         mask_w_sum = 0
         sum_count = 0
+ 
+        # The number of detected objects
+        num_object = num_dets_to_consider
 
         for i in range(0, mask_data.shape[1]):
             for j in range(0,mask_data.shape[2]):
@@ -307,8 +310,9 @@ class DetectImg:
         #print(meanx, meany)
         #print(rotation_point_x, rotation_point_y)
         
-        cv2.imwrite("/home/geonhee-ml/Desktop/1.jpg", img_numpy)
-        cv2.imwrite("/home/geonhee-ml/Desktop/2.jpg", mask_data[0,:,:,:])
+        cv2.imwrite("/home/geonhee-ml/Desktop/img.jpg", img_numpy)
+        for i in range(0, num_object):
+            cv2.imwrite("/home/geonhee-ml/Desktop/mask_%d.jpg" %i, mask_data[i,:,:,:])
 
     def prep_display(self, dets_out, img, h, w, undo_transform=True, class_color=False, mask_alpha=0.45, image_header=Header()):
         """
@@ -442,7 +446,7 @@ class DetectImg:
                 detections.header.frame_id = image_header.frame_id
                 self.detections_pub.publish(detections)
                 
-            return img_numpy, masks
+            return num_dets_to_consider, img_numpy, masks
 
     def get_data(self):
         # Data options (change me)
