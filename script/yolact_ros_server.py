@@ -63,6 +63,7 @@ from yolact_ros_msgs.msg import Detections
 from yolact_ros_msgs.msg import Detection
 from yolact_ros_msgs.msg import Box
 from yolact_ros_msgs.msg import Mask
+from yolact_ros_msgs.msg import GraspPt
 from cv_bridge import CvBridge, CvBridgeError
 
 ros_path = '/opt/ros/kinetic/lib/python2.7/dist-packages'
@@ -169,21 +170,22 @@ class DetectImg:
         
         self.bridge = CvBridge()
         self.detections_pub = rospy.Publisher("detections",numpy_msg(Detections),queue_size=10)
+        self.com_pub = rospy.Publisher("com_info",numpy_msg(GraspPt),queue_size=10)
         self.image_pub = rospy.Publisher("cvimage_published",Image,queue_size=10)
 
         start_server = rospy.Service('/start_instance_seg', SetBool, self.server_cb)
 
     def server_cb(self, data):
-        self.evaluate(self.net)
+        angle = self.evaluate(self.net)
 
-        return SetBoolResponse(True, "Detect!!!")
+        return SetBoolResponse(True, str(angle))
 
     def evaluate(self, net:Yolact, train_mode=False):
         net.detect.use_fast_nms = args.fast_nms
         cfg.mask_proto_debug = args.mask_proto_debug
 
-        self.evalimage()
-        return
+        angle = self.evalimage()
+        return angle
             
     def evalimage(self):
         cv_img = self.get_data()
@@ -196,123 +198,129 @@ class DetectImg:
         
         try:
             self.image_pub.publish(self.bridge.cv2_to_imgmsg(img_numpy, "bgr8"))
-            self.get_orientation_from_mask(num_dets_to_consider, img_numpy, masks)
+            angle = self.get_orientation_from_mask(num_dets_to_consider, img_numpy, masks)
+            return angle
         except CvBridgeError as e:
             print(e)
 
-    
     def get_orientation_from_mask(self, num_dets_to_consider, img_numpy, mask):
+
+        if num_dets_to_consider == 0:
+            return
+
         mask_data = mask.cpu()
         mask_data = mask_data.numpy()
         mask_data = mask_data.astype(np.int64)
         mask_data = mask_data * 100
-        
-        mask_h_sum = 0
-        mask_w_sum = 0
-        sum_count = 0
- 
+         
         # The number of detected objects
         num_object = num_dets_to_consider
+        center_of_mass_instance = GraspPt()
 
-        for i in range(0, mask_data.shape[1]):
-            for j in range(0,mask_data.shape[2]):
-                if mask_data[0,i,j,0] != 0:
-                    mask_h_sum += i
-                    mask_w_sum += j
-                    sum_count += 1
+        for num_ in range(0, num_object):
+            mask_h_sum = 0
+            mask_w_sum = 0
+            sum_count = 0
+            
+            for i in range(0, mask_data.shape[1]):
+                for j in range(0,mask_data.shape[2]):
+                    if mask_data[num_,i,j,0] != 0:
+                        mask_h_sum += i
+                        mask_w_sum += j
+                        sum_count += 1
 
-        mask_h = mask_h_sum / sum_count
-        mask_w = mask_w_sum / sum_count
+            mask_h = mask_h_sum / sum_count
+            mask_w = mask_w_sum / sum_count
 
-        mask_h_index = int(mask_h)
-        mask_w_index = int(mask_w)
+            mask_h_index = int(mask_h)
+            mask_w_index = int(mask_w)
 
-        print ("-----------------------------")
-        print ("center of mass x :", mask_h_index)
-        print ("center of mass y :", mask_w_index)
-        print ("-----------------------------")
+            print ("-----------------------------")
+            print ("center of mass x :", mask_w_index)
+            print ("center of mass y :", mask_h_index)
+            print ("-----------------------------")
 
-        mask_data[0, mask_h_index, mask_w_index, 0] = 255
+            mask_data[num_, mask_h_index, mask_w_index, 0] = 255
 
-        img = mask_data[0, :, :, 0]
-        img = mask_data[0, :, :, 0]
-    
-        rows = img.shape[0]
-        cols = img.shape[1]
+            img = mask_data[num_, :, :, 0]
         
-        x = np.ones((rows, 1))
-        y = np.ones((1, cols))
+            rows = img.shape[0]
+            cols = img.shape[1]
+            
+            x = np.ones((rows, 1))
+            y = np.ones((1, cols))
 
-        for i in range(2, cols+1):
-            m = np.ones((rows, 1))*i
-            x = np.hstack((x,m))
+            for i in range(2, cols+1):
+                m = np.ones((rows, 1))*i
+                x = np.hstack((x,m))
 
-        for i in range(2, rows+1):
-            n = np.ones((1, cols))*i
-            y = np.vstack((y,n))
+            for i in range(2, rows+1):
+                n = np.ones((1, cols))*i
+                y = np.vstack((y,n))
 
-        area = img.sum()
-        f_img = img.astype(np.float)
+            area = img.sum()
+            f_img = img.astype(np.float)
 
-        im_x = (f_img * x)
-        im_y = (f_img * y)
+            im_x = (f_img * x)
+            im_y = (f_img * y)
 
-        meanx = im_x.sum()/area
-        meany = im_y.sum()/area
+            meanx = im_x.sum()/area
+            meany = im_y.sum()/area
 
-        x = x - meanx
-        y = y - meany
+            x = x - meanx
+            y = y - meany
 
-        a_img = f_img * (x * x)
-        b_img = f_img * (x * y)
-        c_img = f_img * (y * y)
+            a_img = f_img * (x * x)
+            b_img = f_img * (x * y)
+            c_img = f_img * (y * y)
+            
+            a = a_img.sum()
+            b = b_img.sum()*2
+            c = c_img.sum() 
+
+            denom = b*b + (a-c)*(a-c)
+
+            if denom == 0:
+                thetamin = 2 * 3.14 * random.random(0,1)
+                thetamax = 2 * 3.14 * random.random(0,1)
+                roundness = 1
+            else:
+                sin2thetamin = b/math.sqrt(denom)
+                sin2thetamax = -sin2thetamin
+                cos2thetamin = (a-c)/math.sqrt(denom)
+                cos2thetamax = -cos2thetamin
+
+                thetamin = math.atan2(sin2thetamin, cos2thetamin)/2
+                thetamax = math.atan2(sin2thetamax, cos2thetamax)/2
+
+                lmin = 0.5*(c+a) - 0.5*(a-c)*cos2thetamin - 0.5*b*sin2thetamin
+                lmax = 0.5*(c+a) - 0.5*(a-c)*cos2thetamax - 0.5*b*sin2thetamax
+
+                roundness = lmin/lmax
+            
+            print ("-----------------------------")
+            print ("Theta_min(deg)",thetamin * 57.325)
+            print ("-----------------------------")
+
+            point_x = 50*math.sin(thetamin)
+            point_y = 50*math.cos(thetamin)
+
+            rotation_point_x = mask_h_index - point_x
+            rotation_point_y = mask_w_index - point_y
+
+            rotation_point_x = int(rotation_point_x)
+            rotation_point_y = int(rotation_point_y)
+            
+            mask_data[num_, rotation_point_x, rotation_point_y, 0] = 255
+            
+            center_of_mass_instance.com_x.append(mask_w_index)
+            center_of_mass_instance.com_y.append(mask_h_index)
+            center_of_mass_instance.angle.append(thetamin)
         
-        a = a_img.sum()
-        b = b_img.sum()*2
-        c = c_img.sum() 
-
-        denom = b*b + (a-c)*(a-c)
-
-        if denom == 0:
-            thetamin = 2 * 3.14 * random.random(0,1)
-            thetamax = 2 * 3.14 * random.random(0,1)
-            roundness = 1
-        else:
-            sin2thetamin = b/math.sqrt(denom)
-            sin2thetamax = -sin2thetamin
-            cos2thetamin = (a-c)/math.sqrt(denom)
-            cos2thetamax = -cos2thetamin
-
-            thetamin = math.atan2(sin2thetamin, cos2thetamin)/2
-            thetamax = math.atan2(sin2thetamax, cos2thetamax)/2
-
-            lmin = 0.5*(c+a) - 0.5*(a-c)*cos2thetamin - 0.5*b*sin2thetamin
-            lmax = 0.5*(c+a) - 0.5*(a-c)*cos2thetamax - 0.5*b*sin2thetamax
-
-            roundness = lmin/lmax
-        
-        print ("-----------------------------")
-        print ("Theta_min",thetamin)
-        print ("-----------------------------")
-
-        point_x = 50*math.sin(thetamin)
-        point_y = 50*math.cos(thetamin)
-
-        rotation_point_x = mask_h_index - point_x
-        rotation_point_y = mask_w_index - point_y
-
-        rotation_point_x = int(rotation_point_x)
-        rotation_point_y = int(rotation_point_y)
-        
-        mask_data[0, rotation_point_x, rotation_point_y, 0] = 255
-
-        #print(point_x, point_y)
-        #print(meanx, meany)
-        #print(rotation_point_x, rotation_point_y)
-        
-        cv2.imwrite("/home/geonhee-ml/Desktop/img.jpg", img_numpy)
+        self.com_pub.publish(center_of_mass_instance)
+        cv2.imwrite("/home/geonhee-ml/Desktop/%d_img_raw.jpg" %(thetamin * 57.325), img_numpy)
         for i in range(0, num_object):
-            cv2.imwrite("/home/geonhee-ml/Desktop/mask_%d.jpg" %i, mask_data[i,:,:,:])
+            cv2.imwrite("/home/geonhee-ml/Desktop/%d_img_mask__%d_deg.jpg" %(i, center_of_mass_instance.angle[i] * 57.325), mask_data[i,:,:,:])
 
     def prep_display(self, dets_out, img, h, w, undo_transform=True, class_color=False, mask_alpha=0.45, image_header=Header()):
         """
@@ -433,7 +441,7 @@ class DetectImg:
                     mask_shape = np.shape(masks[j])
                     #print("Shape: ", mask_shape)
                     mask_bb = np.squeeze(masks[j].cpu().numpy(), axis=2)[y1:y2,x1:x2]
-                    print("Box: ", x1,",",x2,",",y1,",",y2)
+                    print("Box: x1:", x1,", x2: ",x2,", y1: ",y1,", y2: ",y2)
                     #print("Mask in box shape: ", np.shape(mask_bb))
                     mask_rs = np.reshape(mask_bb, -1)
                     #print("New shape: ", np.shape(mask_rs))
