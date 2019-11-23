@@ -116,7 +116,8 @@ catkin_install_python(PROGRAMS
 	script/yolact_ros.py
 	script/yolact_webcam.py 
 	script/yolact_capture_img.py  
-	script/yolact_tcp_img.py
+  script/yolact_tcp_img.py
+  script/yolact_ros_server.py
 			DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 ###########
