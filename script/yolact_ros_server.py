@@ -453,8 +453,7 @@ class DetectImg:
                 self.detections_pub.publish(detections)
                 
             self.get_orientation_from_mask(num_dets_to_consider, img_numpy, masks)
-
-                
+   
             try:
                 self.image_pub.publish(self.bridge.cv2_to_imgmsg(img_numpy, "bgr8"))
             except CvBridgeError as e:
