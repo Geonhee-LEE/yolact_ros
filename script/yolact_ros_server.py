@@ -177,16 +177,15 @@ class DetectImg:
         start_server = rospy.Service('/start_instance_seg', SetBool, self.server_cb)
 
     def server_cb(self, data):
-        angle = self.evaluate(self.net)
+        self.evaluate(self.net)
 
-        return SetBoolResponse(True, str(angle))
+        return SetBoolResponse(True, "Success")
 
     def evaluate(self, net:Yolact, train_mode=False):
         net.detect.use_fast_nms = args.fast_nms
         cfg.mask_proto_debug = args.mask_proto_debug
 
-        angle = self.evalimage()
-        return angle
+        self.evalimage()
             
     def evalimage(self):
         cv_img = self.get_data()
@@ -195,19 +194,10 @@ class DetectImg:
         batch = FastBaseTransform()(frame.unsqueeze(0))
         preds = self.net(batch)
 
-        num_dets_to_consider, img_numpy, masks = self.prep_display(preds, frame, None, None, undo_transform=False)
-        
-        try:
-            self.image_pub.publish(self.bridge.cv2_to_imgmsg(img_numpy, "bgr8"))
-            angle = self.get_orientation_from_mask(num_dets_to_consider, img_numpy, masks)
-            return angle
-        except CvBridgeError as e:
-            print(e)
+        self.prep_display(preds, frame, None, None, undo_transform=False)
 
     def get_orientation_from_mask(self, num_dets_to_consider, img_numpy, mask):
 
-        if num_dets_to_consider == 0:
-            return
 
         mask_data = mask.cpu()
         mask_data = mask_data.numpy()
@@ -462,7 +452,15 @@ class DetectImg:
                 detections.header.frame_id = image_header.frame_id
                 self.detections_pub.publish(detections)
                 
-            return num_dets_to_consider, img_numpy, masks
+            self.get_orientation_from_mask(num_dets_to_consider, img_numpy, masks)
+
+                
+            try:
+                self.image_pub.publish(self.bridge.cv2_to_imgmsg(img_numpy, "bgr8"))
+            except CvBridgeError as e:
+                print(e)
+            
+            #return num_dets_to_consider, img_numpy, masks
 
     def get_data(self):
         # Data options (change me)
