@@ -166,6 +166,7 @@ def parse_args(argv=None):
 class DetectImg:
     def __init__(self, net:Yolact):
         print ("Initalization about DetectImg class")
+        self.save_cnt = 0
         self.net = net
         
         self.bridge = CvBridge()
@@ -298,6 +299,11 @@ class DetectImg:
 
                 roundness = lmin/lmax
             
+            if thetamin > 0:
+                pass
+            elif thetamin < 0:
+                thetamin = np.pi + thetamin
+
             print ("-----------------------------")
             print ("Theta_min(deg)",thetamin * 57.325)
             print ("-----------------------------")
@@ -315,12 +321,14 @@ class DetectImg:
             
             center_of_mass_instance.com_x.append(mask_w_index)
             center_of_mass_instance.com_y.append(mask_h_index)
+
             center_of_mass_instance.angle.append(thetamin)
         
         self.com_pub.publish(center_of_mass_instance)
-        cv2.imwrite("/home/geonhee-ml/Desktop/%d_img_raw.jpg" %(thetamin * 57.325), img_numpy)
+        self.save_cnt = self.save_cnt +1 
+        cv2.imwrite("/home/geonhee-ml/Desktop/%d_img_raw_%d.jpg" %(self.save_cnt, thetamin * 57.325), img_numpy)
         for i in range(0, num_object):
-            cv2.imwrite("/home/geonhee-ml/Desktop/%d_img_mask__%d_deg.jpg" %(i, center_of_mass_instance.angle[i] * 57.325), mask_data[i,:,:,:])
+            cv2.imwrite("/home/geonhee-ml/Desktop/%d_img_mask_%d.jpg" %(self.save_cnt, center_of_mass_instance.angle[i] * 57.325), mask_data[i,:,:,:])
 
     def prep_display(self, dets_out, img, h, w, undo_transform=True, class_color=False, mask_alpha=0.45, image_header=Header()):
         """
@@ -504,7 +512,7 @@ class DetectImg:
         #tmp_depth_data.shape = (im_height,im_width)
         #tmp_depth_data = tmp_depth_data.astype(float)/1000
 
-        cv2.imwrite(os.path.join('.', 'test.png'), tmp_color_image)
+        #cv2.imwrite(os.path.join('.', 'test.png'), tmp_color_image)
         #cv2.imwrite(os.path.join('.', 'test-depth.png'), tmp_depth_data)
 
         return tmp_color_image
