@@ -196,8 +196,9 @@ class DetectImg:
 
         self.prep_display(preds, frame, None, None, undo_transform=False)
 
-    def get_orientation_from_mask(self, num_dets_to_consider, img_numpy, mask):
-
+    def get_orientation_from_mask(self, num_dets_to_consider, img_numpy, detections, mask):
+        print ("-----------------------------")
+        print ("The number of evaluation: ",self.save_cnt)
 
         mask_data = mask.cpu()
         mask_data = mask_data.numpy()
@@ -209,6 +210,8 @@ class DetectImg:
         center_of_mass_instance = GraspPt()
 
         for num_ in range(0, num_object):
+            print ("Class name:", detections.detections[num_object -1 - num_].class_name) # Start point is different
+            print ("Score:", detections.detections[num_object -1 - num_].score)
             mask_h_sum = 0
             mask_w_sum = 0
             sum_count = 0
@@ -226,10 +229,8 @@ class DetectImg:
             mask_h_index = int(mask_h)
             mask_w_index = int(mask_w)
 
-            print ("-----------------------------")
             print ("center of mass x :", mask_w_index)
             print ("center of mass y :", mask_h_index)
-            print ("-----------------------------")
 
             mask_data[num_, mask_h_index, mask_w_index, 0] = 255
 
@@ -294,9 +295,7 @@ class DetectImg:
             elif thetamin < 0:
                 thetamin = np.pi + thetamin
 
-            print ("-----------------------------")
             print ("Theta_min(deg)",thetamin * 57.325)
-            print ("-----------------------------")
 
             point_x = 50*math.sin(thetamin)
             point_y = 50*math.cos(thetamin)
@@ -309,6 +308,8 @@ class DetectImg:
             
             mask_data[num_, rotation_point_x, rotation_point_y, 0] = 255
             
+            center_of_mass_instance.class_name.append(detections.detections[num_object -1 - num_].class_name)
+            center_of_mass_instance.score.append(detections.detections[num_object -1 - num_].score)
             center_of_mass_instance.com_x.append(mask_w_index)
             center_of_mass_instance.com_y.append(mask_h_index)
 
@@ -319,6 +320,7 @@ class DetectImg:
         cv2.imwrite("/home/geonhee-ml/Desktop/%d_img_raw_%d.jpg" %(self.save_cnt, thetamin * 57.325), img_numpy)
         for i in range(0, num_object):
             cv2.imwrite("/home/geonhee-ml/Desktop/%d_img_mask_%d.jpg" %(self.save_cnt, center_of_mass_instance.angle[i] * 57.325), mask_data[i,:,:,:])
+        print ("-----------------------------")
 
     def prep_display(self, dets_out, img, h, w, undo_transform=True, class_color=False, mask_alpha=0.45, image_header=Header()):
         """
@@ -438,8 +440,9 @@ class DetectImg:
                     det.score = score
                     mask_shape = np.shape(masks[j])
                     #print("Shape: ", mask_shape)
-                    mask_bb = np.squeeze(masks[j].cpu().numpy(), axis=2)[y1:y2,x1:x2]
-                    print("Box: x1:", x1,", x2: ",x2,", y1: ",y1,", y2: ",y2)
+                    #mask_bb = np.squeeze(masks[j].cpu().numpy(), axis=2)[y1:y2,x1:x2] # Crop
+                    mask_bb = np.squeeze(masks[j].cpu().numpy(), axis=2)[:,:] # Every mask (1280 * 720)
+                    #print("Box: x1:", x1,", x2: ",x2,", y1: ",y1,", y2: ",y2)
                     #print("Mask in box shape: ", np.shape(mask_bb))
                     mask_rs = np.reshape(mask_bb, -1)
                     #print("New shape: ", np.shape(mask_rs))
@@ -450,9 +453,9 @@ class DetectImg:
                     detections.detections.append(det)
                 detections.header.stamp = image_header.stamp
                 detections.header.frame_id = image_header.frame_id
-                self.detections_pub.publish(detections)
-                
-            self.get_orientation_from_mask(num_dets_to_consider, img_numpy, masks)
+            
+            self.detections_pub.publish(detections)                
+            self.get_orientation_from_mask(num_dets_to_consider, img_numpy, detections, masks)
    
             try:
                 self.image_pub.publish(self.bridge.cv2_to_imgmsg(img_numpy, "bgr8"))
