@@ -413,7 +413,7 @@ class DetectImg:
                     score = scores[j]
 
                     if args.display_bboxes:
-                        cv2.rectangle(img_numpy, (x1, y1), (x2, y2), color, 1)
+                        cv2.rectangle(img_numpy, (x1, y1), (x2, y2), color, 2)
 
                     if args.display_text:
                         _class = cfg.dataset.class_names[classes[j]]
@@ -425,7 +425,7 @@ class DetectImg:
 
                         text_w, text_h = cv2.getTextSize(text_str, font_face, font_scale, font_thickness)[0]
 
-                        text_pt = (x1, y1 - 3)
+                        text_pt = (x1, y1 - 10)
                         text_color = [255, 255, 255]
 
                         cv2.rectangle(img_numpy, (x1, y1), (x1 + text_w, y1 - text_h - 4), color, -1)
