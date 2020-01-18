@@ -1,6 +1,6 @@
 # yolact_ros
 
-Integrates [Yolact](https://github.com/dbolya/yolact) with ROS
+It is integrated [Yolact](https://github.com/dbolya/yolact) with ROS
 
 [Yolact(You Only Look At CoefficienTs) with ROS and Webcam](https://www.youtube.com/watch?v=Qn949mpmndI&feature=youtu.be)
 
