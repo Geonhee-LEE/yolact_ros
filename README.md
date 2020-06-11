@@ -57,9 +57,6 @@ Conda env:
 - torch11py36(Custom computer)
 - py36_ros(NSCL computer)
 
-```
-rosrun yolact_ros_pkg eval.py --trained_model=/home/geonhee-ml/catkin_ws/src/yolact_ros/yolact_ros_pkg/src/yolact/data/yolact_resnet50_54_800000.pth --score_threshold=0.3 --top_k=100 --video_multiframe=2 --video=0
-```
 
 
 ## Capture image with customized config (In my case, Nobrand)
