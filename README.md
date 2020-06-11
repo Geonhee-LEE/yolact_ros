@@ -50,12 +50,6 @@ It is integrated [Yolact](https://github.com/dbolya/yolact) with ROS
 
 To evalute the model, put the corresponding weights file in the `./weights` directory and run one of the following commands.
 
-# webcam demo
-
-```
-rosrun yolact_ros yolact_ros.py  --trained_model=/home/nscl/catkin_ws/src/yolact_instance/weights/yolact_resnet50_54_800000.pth  --score_threshold=0.3 --top_k=100 --video_multiframe=2 --video=0
-
-```
 
 In my workspace, After downloaded the [weight](https://drive.google.com/file/d/1yp7ZbbDwvMiFJEq4ptVKTYTI2VeRDXl0/view?usp=sharing), copy and paste to the _trained_model path_.
 
