@@ -1,6 +1,6 @@
 # yolact_ros
 
-It is integrated [Yolact](https://github.com/dbolya/yolact) with ROS
+The `yolact_ros` is based on [Yolact](https://github.com/dbolya/yolact) and is integrated with ROS(Robot Operating System)
 
 [![Yolact(You Only Look At CoefficienTs) with ROS and Webcam](http://img.youtube.com/vi/Qn949mpmndI/0.jpg)](https://www.youtube.com/watch?v=Qn949mpmndI&feature=youtu.be)
 
@@ -53,21 +53,25 @@ To evalute the model, put the corresponding weights file in the `./weights` dire
 
 In my workspace, After downloaded the [weight](https://drive.google.com/file/d/1yp7ZbbDwvMiFJEq4ptVKTYTI2VeRDXl0/view?usp=sharing), copy and paste to the _trained_model path_.
 
+
+
+# Yolact ros with Visual grasping
+
+
+[![Yolact(You Only Look At CoefficienTs) grasp](http://img.youtube.com/vi/bBZfp4Ve7Uw/0.jpg)](https://www.youtube.com/watch?v=bBZfp4Ve7Uw&feature=youtu.be)
+
 Conda env: 
 - torch11py36(Custom computer)
 - py36_ros(NSCL computer)
-
-
 
 ## Capture image with customized config (In my case, Nobrand)
 ```
 rosrun yolact_ros yolact_capture_img.py  --trained_model=/home/geonhee-ml/rl_ws/src/yolact_ros/src/yolact/weight/yolact_base_1234_100000.pth  --score_threshold=0.3 --top_k=100 --image=/home/geonhee-ml/rl_ws/src/yolact_ros/src/yolact/image/116.jpg
 ```
 
-[![Yolact(You Only Look At CoefficienTs) grasp](http://img.youtube.com/vi/bBZfp4Ve7Uw/0.jpg)](https://www.youtube.com/watch?v=bBZfp4Ve7Uw&feature=youtu.be)
 
+## Launch
 
-## Yolact ros with Visual push grasping
 ```
 ./realsense
 ```
